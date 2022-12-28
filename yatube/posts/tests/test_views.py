@@ -2,16 +2,16 @@ import shutil
 import tempfile
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase, override_settings
+from django.test import Client, override_settings, TestCase
 from django.urls import reverse
-from ..models import Post, Group, Follow
-from http import HTTPStatus
 from django.utils import timezone
-from ..forms import PostForm
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
+from http import HTTPStatus
 
+from ..forms import PostForm
+from ..models import Follow, Group, Post
 
 User = get_user_model()
 TEST_OF_POST = 13
@@ -230,3 +230,13 @@ class FollowTests(TestCase):
                                                           )
         posts_no_follow = respone_no_follower.context['page_obj']
         self.assertNotIn(post, posts_no_follow)
+
+    def test_cache_index_page(self):
+        """ Проверка кэша страницы"""
+        old_content = self.authorized_client.get('/').content
+        Post.objects.all().delete()
+        new_content = self.authorized_client.get('/').content
+        self.assertEqual(old_content, new_content)
+        cache.clear()
+        clear_content = self.authorized_client.get('/').content
+        self.assertNotEqual(old_content, clear_content)

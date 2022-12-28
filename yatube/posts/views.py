@@ -1,11 +1,11 @@
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404
-from .models import Post, Group, User, Follow
-from .forms import PostForm, CommentForm
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 
+from .models import Follow, Group, Post, User
+from .forms import CommentForm, PostForm
 
 POSTS_PAGE = 10
 PAGINATOR_NUMBER = 10
@@ -21,7 +21,8 @@ def get_page_paginator(queryset, request):
 def index(request):
     posts = Post.objects.select_related('author', 'group')
     page_obj = get_page_paginator(posts, request)
-    return render(request, 'posts/index.html', {'page_obj': page_obj})
+    return render(request, 'posts/index.html', {'page_obj': page_obj,
+                                                'index': True})
 
 
 def group_posts(request, slug):
@@ -40,7 +41,8 @@ def group_posts(request, slug):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     posts = author.posts.select_related('author', 'group')
-    following = request.user.is_authenticated and author.following.exists()
+    following = (request.user.is_authenticated
+                 and author.following.filter(user=request.user).exists())
     page_obj = get_page_paginator(posts, request)
     context = {
         'author': author,
@@ -109,6 +111,7 @@ def follow_index(request):
     page_obj = get_page_paginator(post_list, request)
     context = {
         'page_obj': page_obj,
+        'follow': True
     }
     return render(request, 'posts/follow.html', context)
 
@@ -126,5 +129,5 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     user = request.user
-    Follow.objects.get(user=user, author__username=username).delete()
+    get_object_or_404(Follow, user=user, author__username=username).delete()
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

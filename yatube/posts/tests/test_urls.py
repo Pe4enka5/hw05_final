@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase, Client
+from django.test import Client, TestCase
 from http import HTTPStatus
+
 from ..models import Post, Group
-from django.core.cache import cache
 
 User = get_user_model()
 
@@ -86,13 +86,3 @@ class PostURLTests(TestCase):
             text='Тестовый пост 2')
         response = self.authorized_client.get(f'/posts/{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
-
-    def test_cache_index_page(self):
-        """ Проверка кэша страницы"""
-        old_content = self.authorized_client.get('/').content
-        Post.objects.all().delete()
-        new_content = self.authorized_client.get('/').content
-        self.assertEqual(old_content, new_content)
-        cache.clear()
-        clear_content = self.authorized_client.get('/').content
-        self.assertNotEqual(old_content, clear_content)

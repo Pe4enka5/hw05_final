@@ -2,13 +2,13 @@ import shutil
 import tempfile
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase, override_settings
+from django.test import Client, override_settings, TestCase
 from django.urls import reverse
-from http import HTTPStatus
-from ..models import Post, Group, Comment
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from http import HTTPStatus
 
+from ..models import Comment, Group, Post
 
 User = get_user_model()
 NUMBER_OF_NEW_ENTRIES = 1
