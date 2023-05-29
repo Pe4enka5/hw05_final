@@ -37,5 +37,5 @@ python manage.py runserver
 
 
 ### Автор: 
-[Андрей Pe4enka5 Печерица](https://github.com/Pe4enka5)
+[Андрей Pe4enka Печерица](https://github.com/Pe4enka5)
 Всем добра и печенек!
